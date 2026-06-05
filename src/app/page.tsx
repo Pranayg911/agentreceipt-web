@@ -4,6 +4,7 @@ import { NpxChip } from "@/components/NpxChip";
 import type { TrustReceipt } from "@/lib/ar/receipt";
 
 const GITHUB_URL = "https://github.com/pranaygupta/agentreceipt-web";
+const CLI_BETA_COMMAND = "npx --yes github:pranaygupta/agentreceipt --web";
 
 const SAMPLE: TrustReceipt = {
   receiptId: "7aa40d348292",
@@ -66,17 +67,14 @@ export default function Home() {
             AgentReceipt
           </span>
         </a>
-        <div className="flex items-center gap-2">
-          <a
-            href={GITHUB_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-1.5 text-sm font-semibold text-[color:var(--muted)] transition hover:border-[color:var(--blue)] hover:text-[color:var(--ink)]"
-          >
-            GitHub
-          </a>
-          <NpxChip compact />
-        </div>
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-1.5 text-sm font-semibold text-[color:var(--muted)] transition hover:border-[color:var(--blue)] hover:text-[color:var(--ink)]"
+        >
+          GitHub
+        </a>
       </nav>
 
       <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-14 pt-8 lg:grid-cols-[1fr_0.78fr] lg:items-center lg:pb-20 lg:pt-16">
@@ -95,13 +93,33 @@ export default function Home() {
             Trust Receipt.
           </p>
 
-          <div className="mt-8 max-w-xl">
+          <div className="paper-card mt-8 max-w-xl rounded-2xl p-4">
+            <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
+              easiest path
+            </div>
+            <div className="mt-1 text-base font-semibold text-[color:var(--ink)]">
+              Run one command in your repo. No upload needed.
+            </div>
+            <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+              The CLI finds your latest Claude Code session, signs the receipt
+              locally, then opens the share page here. Your raw transcript stays
+              on your machine.
+            </p>
+            <div className="mt-4">
+              <NpxChip cmd={CLI_BETA_COMMAND} appendOrigin />
+            </div>
+            <p className="mt-2 text-xs leading-5 text-[color:var(--muted)]">
+              Beta command installs from GitHub until the npm package is live.
+            </p>
+          </div>
+
+          <div className="mt-4 max-w-xl">
             <Dropzone />
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-[color:var(--muted)]">
-            <span>Terminal-first:</span>
-            <NpxChip />
+            <span>Fallback:</span>
+            <span>upload or paste a session file manually.</span>
           </div>
         </div>
 

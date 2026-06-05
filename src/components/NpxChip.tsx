@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 /** Copyable `npx agentreceipt` chip - click to copy. */
 export function NpxChip({
-  cmd = "npx agentreceipt",
+  cmd = "npx agentreceipt --web",
   compact = false,
+  appendOrigin = false,
 }: {
   cmd?: string;
   compact?: boolean;
+  appendOrigin?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const [origin, setOrigin] = useState("");
+  const fullCmd = appendOrigin && origin ? `${cmd} ${origin}` : cmd;
+
+  useEffect(() => {
+    if (appendOrigin) setOrigin(window.location.origin);
+  }, [appendOrigin]);
+
   return (
     <button
       onClick={async () => {
         try {
-          await navigator.clipboard.writeText(cmd);
+          await navigator.clipboard.writeText(fullCmd);
           setCopied(true);
           setTimeout(() => setCopied(false), 1500);
         } catch {
@@ -27,7 +36,7 @@ export function NpxChip({
       }`}
     >
       <span className="text-[color:var(--blue)]">$</span>
-      <span>{cmd}</span>
+      <span className="break-all text-left">{fullCmd}</span>
       <span className="ml-1 text-xs text-[color:var(--muted)]">
         {copied ? "copied" : "copy"}
       </span>
