@@ -42,15 +42,15 @@ export function ShareButton({
     <div className="flex flex-wrap items-center justify-center gap-2">
       <button
         onClick={tweet}
-        className="rounded-lg bg-acc px-4 py-2 text-sm font-semibold text-ink transition-transform active:scale-95"
+        className="soft-button rounded-lg px-4 py-2.5 text-sm font-semibold transition-transform active:scale-95"
       >
         Share on X
       </button>
       <button
         onClick={copy}
-        className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-mut transition-colors hover:text-white active:scale-95"
+        className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] px-4 py-2.5 text-sm font-medium text-[color:var(--muted)] transition-colors hover:border-[color:var(--blue)] hover:text-[color:var(--ink)] active:scale-95"
       >
-        {copied ? "Copied ✓" : "Copy link"}
+        {copied ? "Copied" : "Copy link"}
       </button>
     </div>
   );

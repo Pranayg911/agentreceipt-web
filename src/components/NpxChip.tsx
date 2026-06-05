@@ -2,8 +2,14 @@
 
 import { useState } from "react";
 
-/** Copyable `npx agentreceipt` chip — click to copy. */
-export function NpxChip({ cmd = "npx agentreceipt" }: { cmd?: string }) {
+/** Copyable `npx agentreceipt` chip - click to copy. */
+export function NpxChip({
+  cmd = "npx agentreceipt",
+  compact = false,
+}: {
+  cmd?: string;
+  compact?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -16,12 +22,14 @@ export function NpxChip({ cmd = "npx agentreceipt" }: { cmd?: string }) {
           /* ignore */
         }
       }}
-      className="group inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 font-mono text-sm text-white/90 backdrop-blur transition-colors hover:border-[#6ef2c6]/40"
+      className={`group inline-flex items-center gap-2 rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] font-mono-fancy text-[color:var(--ink)] transition hover:border-[color:var(--blue)] ${
+        compact ? "px-3 py-1.5 text-xs" : "px-4 py-2.5 text-sm"
+      }`}
     >
-      <span className="text-[#6ef2c6]">$</span>
+      <span className="text-[color:var(--blue)]">$</span>
       <span>{cmd}</span>
-      <span className="ml-1 text-xs text-white/40 group-hover:text-white/70">
-        {copied ? "copied ✓" : "copy"}
+      <span className="ml-1 text-xs text-[color:var(--muted)]">
+        {copied ? "copied" : "copy"}
       </span>
     </button>
   );

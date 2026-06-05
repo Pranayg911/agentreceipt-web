@@ -16,14 +16,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
   const r = decodeReceipt(token);
   if (!r) return { title: "AgentReceipt" };
-  const lie = r.body.stats.contradicted > 0;
-  const title = lie
-    ? `Trust ${r.body.trust}/100 — "${r.body.archetype}" (agent lie caught)`
-    : `Trust ${r.body.trust}/100 — "${r.body.archetype}"`;
+  const title = `Trust ${r.body.trust}/100 - ${r.body.archetype}`;
   return {
-    title: `${title} · AgentReceipt`,
-    description: `${r.body.stats.verified} claims verified, ${r.body.stats.contradicted} contradicted, ${r.body.stats.unsupported} unproven across ${r.body.stats.toolCalls} tool calls. ed25519-signed.`,
-    openGraph: { title, type: "article", images: [`/r/${token}/opengraph-image`] },
+    title: `${title} - AgentReceipt`,
+    description: `${r.body.stats.verified} claims verified, ${r.body.stats.contradicted} caught, ${r.body.stats.unsupported} unproven across ${r.body.stats.toolCalls} tool calls.`,
+    openGraph: {
+      title,
+      type: "article",
+      images: [`/r/${token}/opengraph-image`],
+    },
     twitter: { card: "summary_large_image", title },
   };
 }
@@ -32,47 +33,69 @@ export default async function ReceiptPage({ params }: Props) {
   const { token } = await params;
   const receipt = decodeReceipt(token);
   if (!receipt) return notFound();
-  const { valid } = verifyReceipt(receipt);
+  const { valid, reason } = verifyReceipt(receipt);
 
   return (
-    <main className="grid-bg flex min-h-screen flex-col items-center px-6 py-12">
-      <Link href="/" className="font-mono text-sm font-bold tracking-tight">
-        🧾 agent<span className="text-acc">receipt</span>
-      </Link>
-
-      <div className="mt-10">
-        <ReceiptCard receipt={receipt} verified={valid} />
-      </div>
-
-      <div className="mt-6">
-        <ShareButton
-          token={token}
-          trust={receipt.body.trust}
-          archetype={receipt.body.archetype}
-          contradicted={receipt.body.stats.contradicted}
-        />
-      </div>
-
-      <div className="mt-4 max-w-md text-center text-xs text-mut">
-        {valid ? (
-          <>
-            This receipt is <span className="text-ok">cryptographically verified</span>. Edit any
-            number in the link and the signature breaks. The receipt lives entirely in the URL — no
-            account, no server lookup.
-          </>
-        ) : (
-          <span className="text-bad">
-            This receipt failed verification — it was altered after signing.
+    <main className="page-in min-h-screen px-6 py-6">
+      <nav className="mx-auto flex max-w-5xl items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="grid h-8 w-8 place-items-center rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] font-mono-fancy text-[11px] font-bold text-[color:var(--blue)]">
+            AR
           </span>
-        )}
-      </div>
+          <span className="font-display text-xl font-semibold">
+            AgentReceipt
+          </span>
+        </Link>
+        <Link
+          href="/"
+          className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-2 text-sm font-semibold text-[color:var(--ink)]"
+        >
+          Grade a session
+        </Link>
+      </nav>
 
-      <Link
-        href="/"
-        className="mt-10 rounded-lg border border-line bg-panel px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-acc/50"
-      >
-        Grade your own session →
-      </Link>
+      <section className="mx-auto grid max-w-5xl gap-8 py-14 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-center">
+        <div className="mx-auto w-full max-w-md lg:mx-0">
+          <ReceiptCard receipt={receipt} verified={valid} />
+          <div className="mt-5">
+            <ShareButton
+              token={token}
+              trust={receipt.body.trust}
+              archetype={receipt.body.archetype}
+              contradicted={receipt.body.stats.contradicted}
+            />
+          </div>
+        </div>
+
+        <aside className="paper-card rounded-2xl p-6">
+          <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
+            verification
+          </div>
+          <h1 className="font-display mt-3 text-3xl font-semibold">
+            {valid ? "Receipt verified." : "Receipt altered."}
+          </h1>
+          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+            {valid
+              ? "The digest, public key fingerprint, and ed25519 signature match. Change a single claim or score and verification fails."
+              : reason ?? "The receipt failed cryptographic verification."}
+          </p>
+
+          <div className="mt-6 space-y-2 font-mono-fancy text-[11px]">
+            <Fact label="receipt" value={receipt.receiptId} />
+            <Fact label="session" value={receipt.body.sessionId.slice(0, 12)} />
+            <Fact label="key" value={receipt.signature.fingerprint} />
+          </div>
+        </aside>
+      </section>
     </main>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-3 py-2">
+      <span className="text-[color:var(--muted)]">{label}</span>
+      <span className="truncate">{value}</span>
+    </div>
   );
 }

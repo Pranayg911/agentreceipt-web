@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AgentReceipt — did your AI agent actually do the work?",
+  title: "AgentReceipt - signed proof your AI agent did the work",
   description:
     "Drop a Claude Code / Cursor session and get a signed Trust Receipt: a score, an archetype, and a cited verdict for every claim your agent made. Lies caught. ed25519-verifiable.",
   openGraph: {
@@ -21,13 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         />
       </head>
       <body className="grain" style={{ fontFamily: "var(--font-sans)" }}>
-        <div className="aurora">
-          <div className="aurora-3" />
-        </div>
         {children}
       </body>
     </html>

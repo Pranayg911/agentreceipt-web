@@ -29,25 +29,33 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
-  if (raw.length > MAX_BYTES) {
+  if (Buffer.byteLength(raw, "utf8") > MAX_BYTES) {
     return NextResponse.json({ error: "Transcript too large (12MB max)." }, { status: 413 });
   }
 
-  const session = parseSessionText(raw);
-  if (session.toolCalls.length === 0 && session.assistantText.length < 40) {
+  try {
+    const session = parseSessionText(raw);
+    if (session.toolCalls.length === 0 && session.assistantText.length < 40) {
+      return NextResponse.json(
+        {
+          error:
+            "This doesn't look like a Claude Code / Cursor session transcript (no assistant turns or tool calls found).",
+        },
+        { status: 422 }
+      );
+    }
+
+    const analysis = analyze(session);
+    const receipt = buildReceipt(session, analysis, score(analysis), Date.now());
+    const token = encodeReceipt(receipt);
+    const valid = verifyReceipt(receipt).valid;
+
+    return NextResponse.json({ ok: true, receipt, token, valid });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
     return NextResponse.json(
-      {
-        error:
-          "This doesn't look like a Claude Code / Cursor session transcript (no assistant turns or tool calls found).",
-      },
-      { status: 422 }
+      { error: `Could not grade transcript: ${msg}` },
+      { status: 500 }
     );
   }
-
-  const analysis = analyze(session);
-  const receipt = buildReceipt(session, analysis, score(analysis), Date.now());
-  const token = encodeReceipt(receipt);
-  const valid = verifyReceipt(receipt).valid;
-
-  return NextResponse.json({ ok: true, receipt, token, valid });
 }

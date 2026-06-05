@@ -1,17 +1,11 @@
 import type { TrustReceipt } from "@/lib/ar/receipt";
 
 const STATUS = {
-  verified: { icon: "✓", color: "text-ok", label: "verified" },
-  contradicted: { icon: "✗", color: "text-bad", label: "contradicted" },
-  unsupported: { icon: "~", color: "text-warn", label: "unproven" },
+  verified: { label: "verified", tone: "text-[color:var(--green)]" },
+  contradicted: { label: "caught", tone: "text-[color:var(--red)]" },
+  unsupported: { label: "unproven", tone: "text-[color:var(--amber)]" },
 } as const;
 
-function scoreColor(t: number): string {
-  return t >= 80 ? "text-ok" : t >= 55 ? "text-warn" : "text-bad";
-}
-
-/** The shareable Trust Receipt card. Used on the landing sample and the
- *  public verify page. Pure presentational. */
 export function ReceiptCard({
   receipt,
   verified,
@@ -21,59 +15,84 @@ export function ReceiptCard({
 }) {
   const s = receipt.body;
   const st = s.stats;
+
   return (
-    <div className="card-glow relative w-full max-w-md rounded-2xl border border-white/10 bg-[#0e1219]/90 p-6 font-mono backdrop-blur">
-      <div className="absolute inset-x-0 top-0 h-px rounded-t-2xl bg-gradient-to-r from-transparent via-[#6ef2c6]/50 to-transparent" />
-      <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.2em] text-mut">
-        <span>Agent Receipt</span>
-        <span>{s.sessionId.slice(0, 8)} · {receipt.receiptId}</span>
+    <article className="paper-card overflow-hidden rounded-2xl">
+      <div className="border-b border-[color:var(--line)] px-5 py-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--muted)]">
+              trust receipt
+            </div>
+            <div className="font-mono-fancy mt-1 text-[11px] text-[color:var(--muted)]">
+              {s.sessionId.slice(0, 8)} / {receipt.receiptId}
+            </div>
+          </div>
+          <span className="rounded-full border border-[color:var(--line)] bg-[color:var(--green-soft)] px-2.5 py-1 text-[11px] font-semibold text-[color:var(--green)]">
+            {verified ? "verified" : "invalid"}
+          </span>
+        </div>
       </div>
 
-      <div className="mt-5 flex items-end gap-4">
-        <div className={`text-6xl font-bold leading-none ${scoreColor(s.trust)}`}>
-          {s.trust}
-        </div>
-        <div className="pb-1">
-          <div className="text-[11px] uppercase tracking-widest text-mut">trust</div>
-          <div className="text-lg font-bold text-white" style={{ fontFamily: "var(--font-sans)" }}>
-            {s.archetype}
+      <div className="px-5 py-5">
+        <div className="flex items-end gap-4">
+          <div className="font-display text-6xl font-semibold leading-none text-[color:var(--green)]">
+            {s.trust}
+          </div>
+          <div className="pb-1">
+            <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--muted)]">
+              trust score
+            </div>
+            <div className="font-display text-xl font-semibold">
+              {s.archetype}
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-5 space-y-2.5">
-        {s.claims.length === 0 && (
-          <div className="text-[12px] text-mut">No success claims found to check.</div>
-        )}
-        {s.claims.map((c, i) => {
-          const m = STATUS[c.status];
-          return (
-            <div key={i} className="text-[12px] leading-snug">
-              <div className="flex gap-2">
-                <span className={`${m.color} font-bold`}>{m.icon}</span>
-                <span className="text-white/90">
-                  &ldquo;{c.claim.length > 90 ? c.claim.slice(0, 88) + "…" : c.claim}&rdquo;
-                </span>
+        <div className="mt-5 grid grid-cols-3 gap-2">
+          <Stat label="verified" value={st.verified} />
+          <Stat label="caught" value={st.contradicted} />
+          <Stat label="edits" value={st.edits} />
+        </div>
+
+        <div className="mt-5 space-y-2">
+          {s.claims.slice(0, 3).map((claim, i) => {
+            const meta = STATUS[claim.status];
+            return (
+              <div
+                key={`${claim.kind}-${i}`}
+                className="rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-3 py-2"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="truncate text-sm font-medium">
+                    {claim.claim}
+                  </div>
+                  <div className={`shrink-0 text-xs font-semibold ${meta.tone}`}>
+                    {meta.label}
+                  </div>
+                </div>
+                <div className="mt-1 truncate font-mono-fancy text-[11px] text-[color:var(--muted)]">
+                  {claim.evidence}
+                </div>
               </div>
-              <div className="pl-5 text-[11px] text-mut">{c.evidence}</div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
 
-      <div className="mt-5 border-t border-line pt-3 text-[11px] text-mut">
-        <div>
-          {st.toolCalls} tool calls · {st.edits} edits ·{" "}
-          <span className="text-ok">{st.verified} verified</span> ·{" "}
-          <span className="text-warn">{st.unsupported} unproven</span> ·{" "}
-          <span className="text-bad">{st.contradicted} contradicted</span> · ~${st.approxCostUsd}
+        <div className="mt-4 border-t border-[color:var(--line)] pt-3 font-mono-fancy text-[10px] text-[color:var(--muted)]">
+          ed25519 / key {receipt.signature.fingerprint}
         </div>
-        <div className="mt-1.5 flex items-center gap-1.5">
-          <span className={verified ? "text-ok" : "text-bad"}>
-            {verified ? "✓ ed25519 signed & verifiable" : "✗ signature invalid"}
-          </span>
-          <span className="text-mut/60">· key {receipt.signature.fingerprint}</span>
-        </div>
+      </div>
+    </article>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-3 py-2">
+      <div className="font-display text-xl font-semibold">{value}</div>
+      <div className="font-mono-fancy text-[10px] text-[color:var(--muted)]">
+        {label}
       </div>
     </div>
   );
