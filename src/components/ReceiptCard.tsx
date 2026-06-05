@@ -31,6 +31,7 @@ export function ReceiptCard({
               trust receipt
             </div>
             <div className="font-mono-fancy mt-1 text-[11px] text-[color:var(--muted)]">
+              {s.agent ? `${s.agent} / ` : ""}
               {s.sessionId.slice(0, 8)} / {receipt.receiptId}
             </div>
           </div>
@@ -84,6 +85,12 @@ export function ReceiptCard({
             );
           })}
         </div>
+
+        {s.evidenceNote && (
+          <div className="mt-4 rounded-lg border border-[color:var(--line)] bg-[color:var(--blue-soft)] px-3 py-2 text-xs leading-5 text-[color:var(--muted)]">
+            {s.evidenceNote}
+          </div>
+        )}
 
         <div className="mt-4 border-t border-[color:var(--line)] pt-3 font-mono-fancy text-[10px] text-[color:var(--muted)]">
           ed25519 / key {receipt.signature.fingerprint}

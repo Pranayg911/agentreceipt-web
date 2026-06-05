@@ -11,9 +11,11 @@ export interface TrustReceipt {
   /** Signed core — tamper-evident. */
   body: {
     sessionId: string;
+    agent?: string;
     trust: number;
     archetype: string;
     claims: ClaimReceipt[];
+    evidenceNote?: string;
     stats: {
       toolCalls: number;
       edits: number;

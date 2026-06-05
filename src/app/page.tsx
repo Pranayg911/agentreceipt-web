@@ -10,6 +10,7 @@ const SAMPLE: TrustReceipt = {
   receiptId: "7aa40d348292",
   body: {
     sessionId: "7d310499",
+    agent: "codex",
     trust: 69,
     archetype: "The Optimist",
     claims: [
@@ -101,9 +102,9 @@ export default function Home() {
               Run one command in your repo. No upload needed.
             </div>
             <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
-              The CLI finds your latest Claude Code session, checks git/package
-              evidence locally, then opens the share page here. Your raw
-              transcript stays on your machine.
+              The CLI auto-detects Claude Code, Codex, or Cursor evidence,
+              checks git/package context locally, then opens the share page
+              here. Raw transcripts stay on your machine.
             </p>
             <div className="mt-4">
               <NpxChip cmd={CLI_BETA_COMMAND} appendOrigin />
@@ -164,7 +165,7 @@ export default function Home() {
       </section>
 
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 text-sm text-[color:var(--muted)] sm:flex-row sm:items-center sm:justify-between">
-        <span>Built for Claude Code, Cursor, and AI-generated pull requests.</span>
+        <span>Built for Claude Code, Codex, Cursor, and AI-generated pull requests.</span>
         <span className="font-mono-fancy text-[11px]">
           local-first / MIT /{" "}
           <a
