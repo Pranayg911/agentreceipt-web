@@ -10,34 +10,34 @@ const SAMPLE: TrustReceipt = {
   receiptId: "7aa40d348292",
   body: {
     sessionId: "7d310499",
-    trust: 82,
-    archetype: "The Honest Worker",
+    trust: 69,
+    archetype: "The Optimist",
     claims: [
       {
         kind: "tests",
-        claim: "all tests pass",
+        claim: "Tests failed during the session",
         status: "contradicted",
-        evidence: "claimed tests passed, but `npm test` exited 1",
+        evidence: "tests failed after 5 changed files - `npm test` exited 1",
       },
       {
         kind: "build",
-        claim: "the build is clean",
-        status: "verified",
-        evidence: "build ran and passed - `next build` exited 0",
+        claim: "Build was skipped for changed code",
+        status: "unsupported",
+        evidence: "package.json has a build script, but no build command was observed",
       },
       {
-        kind: "fix",
-        claim: "fixed the auth redirect bug",
+        kind: "typecheck",
+        claim: "Typecheck ran after changes",
         status: "verified",
-        evidence: "6 file edits recorded - e.g. src/middleware.ts",
+        evidence: "typecheck passed after 5 changed files - `tsc --noEmit` exited 0",
       },
     ],
     stats: {
       toolCalls: 138,
-      edits: 22,
-      verified: 2,
+      edits: 5,
+      verified: 1,
       contradicted: 1,
-      unsupported: 0,
+      unsupported: 1,
       inputTokens: 0,
       outputTokens: 0,
       approxCostUsd: 4.18,
@@ -80,17 +80,17 @@ export default function Home() {
       <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-14 pt-8 lg:grid-cols-[1fr_0.78fr] lg:items-center lg:pb-20 lg:pt-16">
         <div className="max-w-2xl">
           <div className="inline-flex rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-1 font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
-            deterministic agent proof
+            deterministic AI work verification
           </div>
 
           <h1 className="mt-6 max-w-3xl text-5xl font-extrabold leading-[1.02] text-[color:var(--ink)] sm:text-6xl lg:text-7xl">
-            Know what your AI agent actually did.
+            Verify what your AI agent actually did.
           </h1>
 
           <p className="mt-5 max-w-xl text-lg leading-8 text-[color:var(--muted)]">
-            AgentReceipt reads the coding-agent transcript you already have,
-            checks claims against real tool calls, and gives you a shareable
-            Trust Receipt.
+            AgentReceipt reads the agent transcript plus local repo evidence,
+            catches failed checks, flags skipped verification, and signs a
+            shareable Trust Receipt.
           </p>
 
           <div className="paper-card mt-8 max-w-xl rounded-2xl p-4">
@@ -101,9 +101,9 @@ export default function Home() {
               Run one command in your repo. No upload needed.
             </div>
             <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
-              The CLI finds your latest Claude Code session, signs the receipt
-              locally, then opens the share page here. Your raw transcript stays
-              on your machine.
+              The CLI finds your latest Claude Code session, checks git/package
+              evidence locally, then opens the share page here. Your raw
+              transcript stays on your machine.
             </p>
             <div className="mt-4">
               <NpxChip cmd={CLI_BETA_COMMAND} appendOrigin />
@@ -127,8 +127,8 @@ export default function Home() {
           <div className="seal" aria-hidden>
             <div className="seal-core">
               <div className="text-center">
-                <div className="text-4xl font-extrabold text-[color:var(--green)]">
-                  82
+                <div className="text-4xl font-extrabold text-[color:var(--amber)]">
+                  69
                 </div>
                 <div className="font-mono-fancy mt-1 text-[9px] uppercase text-[color:var(--muted)]">
                   trust
@@ -147,24 +147,24 @@ export default function Home() {
         <div className="mx-auto grid max-w-6xl gap-4 px-6 py-10 md:grid-cols-3">
           <ProofStep
             n="01"
-            title="Extract claims"
-            body='Finds statements like "tests pass" or "migration ran."'
+            title="Capture evidence"
+            body="Reads transcript tool calls, edited files, git status, and package scripts."
           />
           <ProofStep
             n="02"
-            title="Check evidence"
-            body="Compares them to Bash/Edit/Write results from the session."
+            title="Find gaps"
+            body="Flags failed tests, skipped builds, missing migrations, and unverified code changes."
           />
           <ProofStep
             n="03"
             title="Sign receipt"
-            body="Returns an ed25519-verifiable card that anyone can inspect."
+            body="Returns an ed25519-verifiable receipt that anyone can inspect before trusting the work."
           />
         </div>
       </section>
 
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 text-sm text-[color:var(--muted)] sm:flex-row sm:items-center sm:justify-between">
-        <span>Built for Claude Code, Cursor, and the next wave of coding agents.</span>
+        <span>Built for Claude Code, Cursor, and AI-generated pull requests.</span>
         <span className="font-mono-fancy text-[11px]">
           local-first / MIT /{" "}
           <a

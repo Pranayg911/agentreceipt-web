@@ -2,7 +2,7 @@ import type { TrustReceipt } from "@/lib/ar/receipt";
 
 const STATUS = {
   verified: { label: "verified", tone: "text-[color:var(--green)]" },
-  contradicted: { label: "caught", tone: "text-[color:var(--red)]" },
+  contradicted: { label: "failed", tone: "text-[color:var(--red)]" },
   unsupported: { label: "unproven", tone: "text-[color:var(--amber)]" },
 } as const;
 
@@ -15,6 +15,12 @@ export function ReceiptCard({
 }) {
   const s = receipt.body;
   const st = s.stats;
+  const scoreTone =
+    s.trust >= 80
+      ? "text-[color:var(--green)]"
+      : s.trust >= 55
+        ? "text-[color:var(--amber)]"
+        : "text-[color:var(--red)]";
 
   return (
     <article className="paper-card overflow-hidden rounded-2xl">
@@ -36,7 +42,7 @@ export function ReceiptCard({
 
       <div className="px-5 py-5">
         <div className="flex items-end gap-4">
-          <div className="font-display text-6xl font-semibold leading-none text-[color:var(--green)]">
+          <div className={`font-display text-6xl font-semibold leading-none ${scoreTone}`}>
             {s.trust}
           </div>
           <div className="pb-1">
@@ -51,12 +57,12 @@ export function ReceiptCard({
 
         <div className="mt-5 grid grid-cols-3 gap-2">
           <Stat label="verified" value={st.verified} />
-          <Stat label="caught" value={st.contradicted} />
-          <Stat label="edits" value={st.edits} />
+          <Stat label="failed" value={st.contradicted} />
+          <Stat label="gaps" value={st.unsupported} />
         </div>
 
         <div className="mt-5 space-y-2">
-          {s.claims.slice(0, 3).map((claim, i) => {
+          {s.claims.slice(0, 4).map((claim, i) => {
             const meta = STATUS[claim.status];
             return (
               <div

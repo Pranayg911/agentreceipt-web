@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `Trust ${r.body.trust}/100 - ${r.body.archetype}`;
   return {
     title: `${title} - AgentReceipt`,
-    description: `${r.body.stats.verified} claims verified, ${r.body.stats.contradicted} caught, ${r.body.stats.unsupported} unproven across ${r.body.stats.toolCalls} tool calls.`,
+    description: `${r.body.stats.verified} verified, ${r.body.stats.contradicted} failed, ${r.body.stats.unsupported} gaps across ${r.body.stats.toolCalls} tool calls.`,
     openGraph: {
       title,
       type: "article",

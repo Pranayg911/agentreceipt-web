@@ -141,6 +141,10 @@ export function Dropzone() {
             <div className="mt-1 text-sm font-semibold text-[color:var(--ink)]">
               Upload the file, or paste the raw JSONL here.
             </div>
+            <div className="mt-1 max-w-sm text-xs leading-5 text-[color:var(--muted)]">
+              Manual mode audits transcript evidence only. The CLI path is
+              stronger because it can also inspect git/package context locally.
+            </div>
           </div>
           <button
             type="button"

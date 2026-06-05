@@ -31,7 +31,7 @@ export default async function OG({ params }: { params: Promise<{ token: string }
   const scoreColor = s.trust >= 80 ? OK : s.trust >= 55 ? WARN : BAD;
   const top = s.claims.slice(0, 3);
   const tag = (st: string) =>
-    st === "verified" ? { t: "PASS", c: OK } : st === "contradicted" ? { t: "LIE", c: BAD } : { t: "UNPROVEN", c: WARN };
+    st === "verified" ? { t: "PASS", c: OK } : st === "contradicted" ? { t: "FAIL", c: BAD } : { t: "GAP", c: WARN };
 
   return new ImageResponse(
     (
@@ -70,8 +70,8 @@ export default async function OG({ params }: { params: Promise<{ token: string }
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto", borderTop: `2px solid ${PANEL}`, paddingTop: 24, fontSize: 22 }}>
           <div style={{ display: "flex", gap: 16 }}>
             <div style={{ display: "flex", color: OK }}>{s.stats.verified} verified</div>
-            <div style={{ display: "flex", color: WARN }}>{s.stats.unsupported} unproven</div>
-            <div style={{ display: "flex", color: BAD }}>{s.stats.contradicted} contradicted</div>
+            <div style={{ display: "flex", color: WARN }}>{s.stats.unsupported} gaps</div>
+            <div style={{ display: "flex", color: BAD }}>{s.stats.contradicted} failed</div>
           </div>
           <div style={{ display: "flex", color: ACC }}>ed25519 verified · agentreceipt</div>
         </div>

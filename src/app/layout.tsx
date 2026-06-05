@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AgentReceipt - signed proof your AI agent did the work",
+  title: "AgentReceipt - signed verification for AI-generated work",
   description:
-    "Drop a Claude Code / Cursor session and get a signed Trust Receipt: a score, an archetype, and a cited verdict for every claim your agent made. Lies caught. ed25519-verifiable.",
+    "Verify AI-generated code work with transcript, git, and command evidence. Catch failed checks, skipped verification, and unsupported claims in a signed Trust Receipt.",
   openGraph: {
-    title: "AgentReceipt — the signed proof your AI agent actually did the work",
+    title: "AgentReceipt - signed verification for AI-generated work",
     description:
-      "Catch your coding agent's lies. Drop a session, get a signed, shareable Trust Receipt in 15 seconds.",
+      "Audit AI agent work before you trust it: failed checks, skipped builds, missing migrations, and signed evidence.",
     type: "website",
   },
   twitter: { card: "summary_large_image" },

@@ -1,5 +1,5 @@
 // POST /api/grade — accept a Claude Code / Cursor session transcript (raw
-// JSONL text), grade it server-side (the private key never leaves the server),
+// JSONL text), audit claims + skipped verification from the visible tool log,
 // and return the signed receipt + a self-contained share token. We never store
 // the raw transcript; only the receipt is encoded into the token the client
 // shares.

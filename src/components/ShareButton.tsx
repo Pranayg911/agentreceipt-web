@@ -21,8 +21,8 @@ export function ShareButton({
 
   const text =
     contradicted > 0
-      ? `AgentReceipt caught my AI agent lying — trust score ${trust}/100, "${archetype}". Verify it yourself:`
-      : `My AI coding agent scored ${trust}/100 — "${archetype}". Signed + verifiable:`;
+      ? `AgentReceipt found failed AI work verification — trust score ${trust}/100, "${archetype}". Inspect the signed receipt:`
+      : `My AI coding agent scored ${trust}/100 — "${archetype}". Signed work-verification receipt:`;
 
   function tweet() {
     const u = new URLSearchParams({ text, url });
