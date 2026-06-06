@@ -18,7 +18,8 @@ AgentReceipt Web makes AI-code verification understandable and shareable:
 - Signed receipt viewer at `/r/[token]`.
 - Decision-oriented receipt UI: merge, verify first, stop, or no evidence.
 - Signed PR merge-gate UI: pass, warn, or fail with blocking reason.
-- Human-readable audit trail: request excerpt, files changed, commands run, top issue, and decision.
+- Reviewer insight panel with policy and CI context.
+- Human-readable audit trail: request excerpt, files changed, commands run, CI checks, top issue, and decision.
 - Exact next actions for reviewers and agent users.
 - Open Graph receipt images for Slack, Twitter/X, LinkedIn, and GitHub previews.
 
@@ -28,8 +29,10 @@ AgentReceipt is not an LLM judge. The web app displays receipts produced from de
 
 - Agent transcript tool calls.
 - Command outputs and exit codes.
+- External CI/check-run evidence.
 - Edited files.
 - Git/package context when generated through the CLI.
+- Team policy from `.agentreceipt.json` when configured.
 - Ed25519 signatures over the receipt body.
 
 The useful output is not just a score. It is a signed review artifact with:
@@ -37,9 +40,10 @@ The useful output is not just a score. It is a signed review artifact with:
 - `trust`: 0-100 confidence score.
 - `decision`: what the reviewer should do now.
 - `mergeGate`: whether CI/PR review should pass, warn, or fail.
+- `policy`: optional repo requirements such as tests, build, typecheck, lint, migration, or CI.
 - `summary`: why the decision was made.
 - `nextActions`: exact steps to improve or prove the work.
-- `auditTrail`: redacted context showing what the user asked, which files changed, and which commands ran.
+- `auditTrail`: redacted context showing what the user asked, which files changed, which commands ran, and which CI checks were attached.
 - `claims`: evidence rows with pass/fail/gap status.
 
 ## Privacy

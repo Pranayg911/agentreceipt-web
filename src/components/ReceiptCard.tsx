@@ -25,6 +25,12 @@ const COMMAND_TONE = {
   unknown: "text-[color:var(--amber)]",
 } as const;
 
+const CI_TONE = {
+  PASS: "text-[color:var(--green)]",
+  FAIL: "text-[color:var(--red)]",
+  PENDING: "text-[color:var(--amber)]",
+} as const;
+
 export function ReceiptCard({
   receipt,
   verified,
@@ -41,6 +47,9 @@ export function ReceiptCard({
     ? s.nextActions
     : fallbackActions(st);
   const auditTrail = s.auditTrail ?? fallbackAuditTrail(receipt);
+  const ciChecks = auditTrail.ciChecks ?? [];
+  const policyRequirements = s.policy?.require ?? [];
+  const reviewerInsight = insightFor(mergeGate, st, ciChecks.length, policyRequirements.length);
   const scoreTone =
     s.trust >= 80
       ? "text-[color:var(--green)]"
@@ -113,6 +122,27 @@ export function ReceiptCard({
           </p>
         </div>
 
+        <div className="mt-3 rounded-xl border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-3">
+          <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
+            reviewer insight
+          </div>
+          <p className="mt-1 text-sm leading-6 text-[color:var(--ink)]">
+            {reviewerInsight}
+          </p>
+          {policyRequirements.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {policyRequirements.map((req) => (
+                <span
+                  key={req}
+                  className="rounded-full border border-[color:var(--line)] bg-[color:var(--bg)] px-2 py-1 font-mono-fancy text-[10px] text-[color:var(--muted)]"
+                >
+                  requires {req}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="mt-4 rounded-xl border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-3">
           <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
             what happened
@@ -163,12 +193,38 @@ export function ReceiptCard({
               </div>
             )}
           </div>
+
+          {ciChecks.length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
+                external ci
+              </div>
+              {ciChecks.slice(0, 5).map((check) => {
+                const label = ciStatusLabel(check);
+                return (
+                  <div
+                    key={`${check.name}-${check.conclusion ?? check.status}`}
+                    className="rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-2.5 py-2 font-mono-fancy text-[11px]"
+                  >
+                    <div className={`font-semibold ${CI_TONE[label]}`}>
+                      {label} {check.conclusion ?? check.status}
+                    </div>
+                    <div className="mt-1 break-words text-[color:var(--muted)]">
+                      {check.name}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="mt-5 grid grid-cols-3 gap-2">
+        <div className="mt-5 grid grid-cols-3 gap-2 sm:grid-cols-5">
           <Stat label="verified" value={st.verified} />
           <Stat label="failed" value={st.contradicted} />
           <Stat label="gaps" value={st.unsupported} />
+          <Stat label="policy" value={st.policyViolations ?? 0} />
+          <Stat label="ci" value={st.ciChecks ?? ciChecks.length} />
         </div>
 
         <div className="mt-5 space-y-2">
@@ -239,6 +295,7 @@ function fallbackAuditTrail(receipt: TrustReceipt): NonNullable<TrustReceipt["bo
     changedFiles: [],
     evidenceSource: "none",
     commands: [],
+    ciChecks: [],
     story: [
       "This receipt was created before detailed audit trails were added.",
       `${st.toolCalls} tool calls and ${st.edits} edits were recorded.`,
@@ -248,6 +305,39 @@ function fallbackAuditTrail(receipt: TrustReceipt): NonNullable<TrustReceipt["bo
     privacyNote:
       "Prompt and command text is redacted and length-capped. The full raw transcript is not embedded in the receipt.",
   };
+}
+
+function ciStatusLabel(
+  check: NonNullable<NonNullable<TrustReceipt["body"]["auditTrail"]>["ciChecks"]>[number]
+): "PASS" | "FAIL" | "PENDING" {
+  if (check.status === "completed" && check.conclusion === "success") return "PASS";
+  if (["failure", "cancelled", "timed_out", "action_required", "startup_failure"].includes(
+    check.conclusion ?? ""
+  )) {
+    return "FAIL";
+  }
+  return "PENDING";
+}
+
+function insightFor(
+  mergeGate: NonNullable<TrustReceipt["body"]["mergeGate"]>,
+  stats: TrustReceipt["body"]["stats"],
+  ciCheckCount: number,
+  policyCount: number
+): string {
+  if (mergeGate.status === "fail") {
+    if ((stats.policyViolations ?? 0) > 0) {
+      return "A required team gate did not pass. Treat this as a hard stop until the policy check is satisfied.";
+    }
+    return "There is contradicted evidence in the signed trail. Do not merge until the failed check or claim is fixed.";
+  }
+  if (mergeGate.status === "warn") {
+    return "The work may be okay, but the receipt is missing proof. Run the missing checks so reviewers are not trusting the agent on faith.";
+  }
+  if (ciCheckCount > 0 || policyCount > 0) {
+    return "The agent work, configured policy, and external checks line up. This is ready for normal human code review.";
+  }
+  return "No blocking gap was found in the signed evidence. Keep the receipt with the PR and review the diff normally.";
 }
 
 function fallbackDecision(
@@ -266,6 +356,14 @@ function fallbackMergeGate(
   decision: NonNullable<TrustReceipt["body"]["decision"]>,
   stats: TrustReceipt["body"]["stats"]
 ): NonNullable<TrustReceipt["body"]["mergeGate"]> {
+  if ((stats.policyViolations ?? 0) > 0) {
+    return {
+      status: "fail",
+      title: "Team policy gate failed",
+      reason: `${stats.policyViolations} required policy check(s) must pass before this AI-code change can merge.`,
+      blocking: true,
+    };
+  }
   if (decision.label === "ready") {
     return {
       status: "pass",

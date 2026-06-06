@@ -20,16 +20,20 @@ const SAMPLE: TrustReceipt = {
     },
     mergeGate: {
       status: "fail",
-      title: "Merge gate failed",
-      reason: "1 failed or contradicted finding must be fixed before merge.",
+      title: "Team policy gate failed",
+      reason: "1 required policy check must pass before this AI-code change can merge.",
       blocking: true,
     },
     summary:
-      "Trust 69/100 because AgentReceipt found 1 failed or contradicted finding and 1 unproven gap. Fix the failed evidence before merge.",
+      "Trust 69/100 because a required team policy gate did not pass. Fix the failed evidence before merge.",
     nextActions: [
-      "Fix the failing tests, rerun the test command after the final edit, then regenerate the receipt.",
+      "Fix the required team policy gate, then rerun AgentReceipt.",
       "Run the repo build after the final edit so reviewers can trust the artifact.",
     ],
+    policy: {
+      minTrust: 80,
+      require: ["tests", "build", "ci"],
+    },
     auditTrail: {
       promptExcerpt:
         "Make AgentReceipt show whether the AI actually verified its code before I merge it.",
@@ -44,10 +48,16 @@ const SAMPLE: TrustReceipt = {
         { command: "npm test", status: "failed", exitCode: 1 },
         { command: "npm run typecheck", status: "passed", exitCode: 0 },
       ],
+      ciChecks: [
+        { name: "unit-tests", status: "completed", conclusion: "failure" },
+        { name: "typecheck", status: "completed", conclusion: "success" },
+        { name: "preview-deploy", status: "completed", conclusion: "success" },
+      ],
       story: [
         "User asked: \"Make AgentReceipt show whether the AI actually verified its code before I merge it.\"",
         "Files changed: src/cli.ts, src/receipt.ts, src/analyze.ts, README.md.",
         "Commands observed: 2 total (1 passed, 1 failed, 0 unknown).",
+        "External CI observed: 3 check(s) (2 passed, 1 failed).",
         "Top issue: Tests failed during the session - npm test exited 1.",
         "Decision: Do not merge yet.",
       ],
@@ -56,10 +66,10 @@ const SAMPLE: TrustReceipt = {
     },
     claims: [
       {
-        kind: "tests",
-        claim: "Tests failed during the session",
+        kind: "policy",
+        claim: "Team policy requires tests",
         status: "contradicted",
-        evidence: "tests failed after 5 changed files - `npm test` exited 1",
+        evidence: "policy requires tests, but `npm test` exited 1",
       },
       {
         kind: "build",
@@ -80,6 +90,8 @@ const SAMPLE: TrustReceipt = {
       verified: 1,
       contradicted: 1,
       unsupported: 1,
+      policyViolations: 1,
+      ciChecks: 3,
       inputTokens: 0,
       outputTokens: 0,
       approxCostUsd: 4.18,
@@ -206,6 +218,28 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="mx-auto grid max-w-6xl gap-6 px-6 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <div>
+          <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
+            60-second demo
+          </div>
+          <h2 className="mt-3 font-display text-3xl font-semibold text-[color:var(--ink)] sm:text-4xl">
+            Turn "the agent said done" into a merge decision.
+          </h2>
+          <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+            Configure a repo policy once, let the Action ingest GitHub checks,
+            and every AI-generated PR gets a sticky signed receipt with the
+            exact risk, evidence, and next step.
+          </p>
+        </div>
+        <div className="paper-card rounded-2xl p-4 font-mono-fancy text-xs leading-6 text-[color:var(--muted)]">
+          <DemoLine label="policy" value="{ require: ['tests', 'build', 'ci'], minTrust: 80 }" />
+          <DemoLine label="agent" value="edited src/receipt.ts and claimed the tests passed" />
+          <DemoLine label="evidence" value="npm test exited 1, GitHub check unit-tests failed" />
+          <DemoLine label="receipt" value="Team policy gate failed, blocking merge" />
+        </div>
+      </section>
+
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 text-sm text-[color:var(--muted)] sm:flex-row sm:items-center sm:justify-between">
         <span>Built for Claude Code, Codex, Cursor, and AI-generated pull requests.</span>
         <span className="font-mono-fancy text-[11px]">
@@ -230,6 +264,15 @@ export default function Home() {
         </span>
       </footer>
     </main>
+  );
+}
+
+function DemoLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex gap-3 border-b border-[color:var(--line)] py-2 last:border-b-0">
+      <span className="w-20 shrink-0 text-[color:var(--blue)]">{label}</span>
+      <span className="text-[color:var(--ink)]">{value}</span>
+    </div>
   );
 }
 
