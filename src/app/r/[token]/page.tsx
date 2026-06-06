@@ -16,16 +16,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { token } = await params;
   const r = decodeReceipt(token);
   if (!r) return { title: "AgentReceipt" };
-  const title = `Trust ${r.body.trust}/100 - ${r.body.archetype}`;
+  const decision = r.body.decision?.title ?? r.body.archetype;
+  const title = `Trust ${r.body.trust}/100 - ${decision}`;
+  const description =
+    r.body.summary ??
+    `${r.body.stats.verified} verified, ${r.body.stats.contradicted} failed, ${r.body.stats.unsupported} gaps across ${r.body.stats.toolCalls} tool calls.`;
   return {
     title: `${title} - AgentReceipt`,
-    description: `${r.body.stats.verified} verified, ${r.body.stats.contradicted} failed, ${r.body.stats.unsupported} gaps across ${r.body.stats.toolCalls} tool calls.`,
+    description,
     openGraph: {
       title,
+      description,
       type: "article",
       images: [`/r/${token}/opengraph-image`],
     },
-    twitter: { card: "summary_large_image", title },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

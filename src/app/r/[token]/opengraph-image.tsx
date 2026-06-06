@@ -30,6 +30,8 @@ export default async function OG({ params }: { params: Promise<{ token: string }
   const s = r.body;
   const scoreColor = s.trust >= 80 ? OK : s.trust >= 55 ? WARN : BAD;
   const top = s.claims.slice(0, 3);
+  const decision = s.decision?.title ?? s.archetype;
+  const summary = s.summary ?? `${s.stats.verified} verified / ${s.stats.unsupported} gaps / ${s.stats.contradicted} failed`;
   const tag = (st: string) =>
     st === "verified" ? { t: "PASS", c: OK } : st === "contradicted" ? { t: "FAIL", c: BAD } : { t: "GAP", c: WARN };
 
@@ -47,8 +49,13 @@ export default async function OG({ params }: { params: Promise<{ token: string }
           <div style={{ display: "flex", fontSize: 150, fontWeight: 700, lineHeight: 1, color: scoreColor }}>{s.trust}</div>
           <div style={{ display: "flex", flexDirection: "column", paddingBottom: 18 }}>
             <div style={{ display: "flex", fontSize: 20, color: MUT, letterSpacing: 4 }}>TRUST / 100</div>
-            <div style={{ display: "flex", fontSize: 52, fontWeight: 700 }}>{s.archetype}</div>
+            <div style={{ display: "flex", fontSize: 52, fontWeight: 700 }}>{decision}</div>
+            <div style={{ display: "flex", marginTop: 10, fontSize: 24, color: MUT }}>{s.archetype}</div>
           </div>
+        </div>
+
+        <div style={{ display: "flex", marginTop: 26, fontSize: 25, lineHeight: 1.35, color: "#d5dce8" }}>
+          {summary.length > 118 ? summary.slice(0, 116) + "…" : summary}
         </div>
 
         {/* claims */}

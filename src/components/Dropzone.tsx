@@ -4,7 +4,8 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 const MAX_BYTES = 12 * 1024 * 1024;
-const FIND_LATEST_SESSION = "ls -t ~/.claude/projects/*/*.jsonl | head -1";
+const FIND_CLAUDE_SESSION = "ls -t ~/.claude/projects/*/*.jsonl | head -1";
+const FIND_CODEX_SESSION = "find ~/.codex/sessions -name '*.jsonl' -print | xargs ls -t | head -1";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} bytes`;
@@ -143,7 +144,7 @@ export function Dropzone() {
             </div>
             <div className="mt-1 max-w-sm text-xs leading-5 text-[color:var(--muted)]">
               Manual mode audits transcript evidence only. The CLI path is
-              stronger because it can also inspect git/package context locally.
+              stronger because it also inspects git status and package scripts.
             </div>
           </div>
           <button
@@ -160,7 +161,7 @@ export function Dropzone() {
 
         <div className="mt-4 grid gap-2 text-xs leading-5 text-[color:var(--muted)]">
           <div>
-            <span className="font-semibold text-[color:var(--ink)]">Finder:</span>{" "}
+            <span className="font-semibold text-[color:var(--ink)]">Claude Code:</span>{" "}
             press{" "}
             <code className="rounded bg-[color:var(--blue-soft)] px-1.5 py-0.5 font-mono-fancy text-[color:var(--blue)]">
               Cmd+Shift+G
@@ -172,10 +173,21 @@ export function Dropzone() {
             .
           </div>
           <div>
-            <span className="font-semibold text-[color:var(--ink)]">Terminal:</span>{" "}
+            <span className="font-semibold text-[color:var(--ink)]">Latest Claude file:</span>{" "}
             <code className="rounded bg-[color:var(--blue-soft)] px-1.5 py-0.5 font-mono-fancy text-[color:var(--blue)]">
-              {FIND_LATEST_SESSION}
+              {FIND_CLAUDE_SESSION}
             </code>
+          </div>
+          <div>
+            <span className="font-semibold text-[color:var(--ink)]">Latest Codex file:</span>{" "}
+            <code className="rounded bg-[color:var(--blue-soft)] px-1.5 py-0.5 font-mono-fancy text-[color:var(--blue)]">
+              {FIND_CODEX_SESSION}
+            </code>
+          </div>
+          <div>
+            <span className="font-semibold text-[color:var(--ink)]">Cursor:</span>{" "}
+            use the CLI command above for checkpoint metadata; full Cursor chat
+            transcripts are not yet exposed as a stable local file.
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-// POST /api/grade — accept a Claude Code / Cursor session transcript (raw
+// POST /api/grade — accept a Claude Code, Codex, or Cursor session artifact (raw
 // JSONL text), audit claims + skipped verification from the visible tool log,
 // and return the signed receipt + a self-contained share token. We never store
 // the raw transcript; only the receipt is encoded into the token the client
@@ -25,7 +25,10 @@ export async function POST(req: Request) {
   }
   if (!raw || raw.length < 20) {
     return NextResponse.json(
-      { error: "Empty or tiny transcript. Paste/drop a Claude Code .jsonl session." },
+      {
+        error:
+          "Empty or tiny transcript. Paste/drop a Claude Code, Codex, or Cursor session file.",
+      },
       { status: 400 }
     );
   }
@@ -39,7 +42,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error:
-            "This doesn't look like a Claude Code / Cursor session transcript (no assistant turns or tool calls found).",
+            "This doesn't look like a Claude Code, Codex, or Cursor session artifact (no assistant turns or tool calls found).",
         },
         { status: 422 }
       );

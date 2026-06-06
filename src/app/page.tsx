@@ -13,6 +13,16 @@ const SAMPLE: TrustReceipt = {
     agent: "codex",
     trust: 69,
     archetype: "The Optimist",
+    decision: {
+      label: "do_not_merge",
+      title: "Do not merge yet",
+    },
+    summary:
+      "Trust 69/100 because AgentReceipt found 1 failed or contradicted finding and 1 unproven gap. Fix the failed evidence before merge.",
+    nextActions: [
+      "Fix the failing tests, rerun the test command after the final edit, then regenerate the receipt.",
+      "Run the repo build after the final edit so reviewers can trust the artifact.",
+    ],
     claims: [
       {
         kind: "tests",
@@ -91,7 +101,7 @@ export default function Home() {
           <p className="mt-5 max-w-xl text-lg leading-8 text-[color:var(--muted)]">
             AgentReceipt reads the agent transcript plus local repo evidence,
             catches failed checks, flags skipped verification, and signs a
-            shareable Trust Receipt.
+            shareable Trust Receipt with a clear review decision.
           </p>
 
           <div className="paper-card mt-8 max-w-xl rounded-2xl p-4">
@@ -104,7 +114,8 @@ export default function Home() {
             <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
               The CLI auto-detects Claude Code, Codex, or Cursor evidence,
               checks git/package context locally, then opens the share page
-              here. Raw transcripts stay on your machine.
+              here. Raw transcripts stay on your machine; reviewers get the
+              decision, evidence, and next actions.
             </p>
             <div className="mt-4">
               <NpxChip cmd={CLI_BETA_COMMAND} appendOrigin />
@@ -158,8 +169,8 @@ export default function Home() {
           />
           <ProofStep
             n="03"
-            title="Sign receipt"
-            body="Returns an ed25519-verifiable receipt that anyone can inspect before trusting the work."
+            title="Decide next action"
+            body="Shows whether to merge, verify first, or stop, with exact follow-up steps."
           />
         </div>
       </section>
