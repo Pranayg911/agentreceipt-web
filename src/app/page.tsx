@@ -3,7 +3,7 @@ import { ReceiptCard } from "@/components/ReceiptCard";
 import { NpxChip } from "@/components/NpxChip";
 import type { TrustReceipt } from "@/lib/ar/receipt";
 
-const GITHUB_URL = "https://github.com/Pranayg911/agentreceipt-web";
+const GITHUB_URL = "https://github.com/Pranayg911/agentreceipt";
 const CLI_BETA_COMMAND = "npx --yes github:Pranayg911/agentreceipt --web";
 
 const SAMPLE: TrustReceipt = {

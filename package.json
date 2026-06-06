@@ -2,6 +2,11 @@
   "name": "agentreceipt-web",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://agentreceipt.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pranayg911/agentreceipt-web.git"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
