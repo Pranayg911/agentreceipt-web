@@ -13,6 +13,12 @@ const DECISION_TONE = {
   no_evidence: "border-[color:var(--line)] bg-[color:var(--bg)] text-[color:var(--muted)]",
 } as const;
 
+const GATE_TONE = {
+  pass: "border-[color:var(--green)] bg-[color:var(--green-soft)] text-[color:var(--green)]",
+  warn: "border-[color:var(--amber)] bg-[color:var(--amber-soft)] text-[color:var(--amber)]",
+  fail: "border-[color:var(--red)] bg-white/55 text-[color:var(--red)]",
+} as const;
+
 const COMMAND_TONE = {
   passed: "text-[color:var(--green)]",
   failed: "text-[color:var(--red)]",
@@ -29,6 +35,7 @@ export function ReceiptCard({
   const s = receipt.body;
   const st = s.stats;
   const decision = s.decision ?? fallbackDecision(s.trust, st);
+  const mergeGate = s.mergeGate ?? fallbackMergeGate(decision, st);
   const summary = s.summary ?? fallbackSummary(s.trust, st);
   const nextActions = s.nextActions?.length
     ? s.nextActions
@@ -88,6 +95,21 @@ export function ReceiptCard({
           <div className="mt-1 text-base font-semibold">{decision.title}</div>
           <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
             {summary}
+          </p>
+        </div>
+
+        <div className={`mt-3 rounded-xl border px-3 py-3 ${GATE_TONE[mergeGate.status]}`}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="font-mono-fancy text-[10px] uppercase opacity-80">
+              pr merge gate
+            </div>
+            <div className="font-mono-fancy text-[10px] uppercase opacity-80">
+              {mergeGate.blocking ? "blocking" : "non-blocking"}
+            </div>
+          </div>
+          <div className="mt-1 text-base font-semibold">{mergeGate.title}</div>
+          <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
+            {mergeGate.reason}
           </p>
         </div>
 
@@ -238,6 +260,42 @@ function fallbackDecision(
     return { label: "no_evidence", title: "No code-work evidence" };
   }
   return { label: "ready", title: "Reviewable with evidence" };
+}
+
+function fallbackMergeGate(
+  decision: NonNullable<TrustReceipt["body"]["decision"]>,
+  stats: TrustReceipt["body"]["stats"]
+): NonNullable<TrustReceipt["body"]["mergeGate"]> {
+  if (decision.label === "ready") {
+    return {
+      status: "pass",
+      title: "Merge gate passed",
+      reason: "No failed or unproven findings were detected in the signed evidence.",
+      blocking: false,
+    };
+  }
+  if (decision.label === "verify_first") {
+    return {
+      status: "warn",
+      title: "Merge gate blocked by missing proof",
+      reason: `${stats.unsupported || 1} unproven finding(s) need evidence before this should pass an AI-code merge gate.`,
+      blocking: true,
+    };
+  }
+  if (decision.label === "do_not_merge") {
+    return {
+      status: "fail",
+      title: "Merge gate failed",
+      reason: `${stats.contradicted || 1} failed or contradicted finding(s) must be fixed before merge.`,
+      blocking: true,
+    };
+  }
+  return {
+    status: "fail",
+    title: "Merge gate failed",
+    reason: "No code-work evidence was available to verify.",
+    blocking: true,
+  };
 }
 
 function fallbackSummary(

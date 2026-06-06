@@ -18,6 +18,12 @@ const SAMPLE: TrustReceipt = {
       label: "do_not_merge",
       title: "Do not merge yet",
     },
+    mergeGate: {
+      status: "fail",
+      title: "Merge gate failed",
+      reason: "1 failed or contradicted finding must be fixed before merge.",
+      blocking: true,
+    },
     summary:
       "Trust 69/100 because AgentReceipt found 1 failed or contradicted finding and 1 unproven gap. Fix the failed evidence before merge.",
     nextActions: [
@@ -116,17 +122,17 @@ export default function Home() {
       <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-14 pt-8 lg:grid-cols-[1fr_0.78fr] lg:items-center lg:pb-20 lg:pt-16">
         <div className="max-w-2xl">
           <div className="inline-flex rounded-full border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-1 font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
-            deterministic AI work verification
+            signed ai-code merge gate
           </div>
 
           <h1 className="mt-6 max-w-3xl text-5xl font-extrabold leading-[1.02] text-[color:var(--ink)] sm:text-6xl lg:text-7xl">
-            Verify what your AI agent actually did.
+            Know if your AI code is safe to merge.
           </h1>
 
           <p className="mt-5 max-w-xl text-lg leading-8 text-[color:var(--muted)]">
             AgentReceipt reads the agent transcript plus local repo evidence,
             catches failed checks, flags skipped verification, and signs a
-            shareable Trust Receipt with a clear review decision.
+            shareable Trust Receipt with a clear PR gate: pass, warn, or fail.
           </p>
 
           <div className="paper-card mt-8 max-w-xl rounded-2xl p-4">
@@ -194,8 +200,8 @@ export default function Home() {
           />
           <ProofStep
             n="03"
-            title="Decide next action"
-            body="Shows whether to merge, verify first, or stop, with exact follow-up steps."
+            title="Gate the merge"
+            body="Fails CI on contradicted evidence or missing proof, with exact follow-up steps."
           />
         </div>
       </section>
