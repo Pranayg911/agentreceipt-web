@@ -4,6 +4,7 @@ import { NpxChip } from "@/components/NpxChip";
 import type { TrustReceipt } from "@/lib/ar/receipt";
 
 const GITHUB_URL = "https://github.com/Pranayg911/agentreceipt";
+const WEB_SOURCE_URL = "https://github.com/Pranayg911/agentreceipt-web";
 const CLI_BETA_COMMAND = "npx --yes github:Pranayg911/agentreceipt --web";
 
 const SAMPLE: TrustReceipt = {
@@ -84,7 +85,7 @@ export default function Home() {
           rel="noreferrer"
           className="rounded-lg border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-1.5 text-sm font-semibold text-[color:var(--muted)] transition hover:border-[color:var(--blue)] hover:text-[color:var(--ink)]"
         >
-          GitHub
+          Product repo
         </a>
       </nav>
 
@@ -185,7 +186,16 @@ export default function Home() {
             rel="noreferrer"
             className="text-[color:var(--blue)] underline-offset-4 hover:underline"
           >
-            GitHub
+            product repo
+          </a>
+          {" / "}
+          <a
+            href={WEB_SOURCE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[color:var(--blue)] underline-offset-4 hover:underline"
+          >
+            web source
           </a>
         </span>
       </footer>
