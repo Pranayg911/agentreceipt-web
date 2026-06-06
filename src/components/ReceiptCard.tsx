@@ -13,6 +13,12 @@ const DECISION_TONE = {
   no_evidence: "border-[color:var(--line)] bg-[color:var(--bg)] text-[color:var(--muted)]",
 } as const;
 
+const COMMAND_TONE = {
+  passed: "text-[color:var(--green)]",
+  failed: "text-[color:var(--red)]",
+  unknown: "text-[color:var(--amber)]",
+} as const;
+
 export function ReceiptCard({
   receipt,
   verified,
@@ -27,6 +33,7 @@ export function ReceiptCard({
   const nextActions = s.nextActions?.length
     ? s.nextActions
     : fallbackActions(st);
+  const auditTrail = s.auditTrail ?? fallbackAuditTrail(receipt);
   const scoreTone =
     s.trust >= 80
       ? "text-[color:var(--green)]"
@@ -82,6 +89,58 @@ export function ReceiptCard({
           <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">
             {summary}
           </p>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-[color:var(--line)] bg-[color:var(--paper)] px-3 py-3">
+          <div className="font-mono-fancy text-[10px] uppercase text-[color:var(--blue)]">
+            what happened
+          </div>
+          <div className="mt-2 space-y-2 text-sm leading-6 text-[color:var(--ink)]">
+            {auditTrail.story.slice(0, 5).map((line) => (
+              <div key={line} className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--blue)]" />
+                <span>{line}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 grid gap-2 text-xs leading-5 text-[color:var(--muted)]">
+            <ContextLine
+              label="Prompt"
+              value={auditTrail.promptExcerpt ?? "Not available in this session artifact"}
+            />
+            <ContextLine
+              label="Files"
+              value={
+                auditTrail.changedFiles.length
+                  ? auditTrail.changedFiles.slice(0, 6).join(", ")
+                  : "No file paths identified"
+              }
+            />
+            <ContextLine label="Source" value={auditTrail.evidenceSource} />
+          </div>
+
+          <div className="mt-3 space-y-1.5">
+            {auditTrail.commands.slice(0, 5).map((cmd, i) => (
+              <div
+                key={`${cmd.command}-${i}`}
+                className="rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-2.5 py-2 font-mono-fancy text-[11px]"
+              >
+                <div className={`font-semibold ${COMMAND_TONE[cmd.status]}`}>
+                  {cmd.status.toUpperCase()}
+                  {cmd.exitCode == null ? "" : ` exit ${cmd.exitCode}`}
+                </div>
+                <div className="mt-1 break-words text-[color:var(--muted)]">
+                  {cmd.command}
+                </div>
+              </div>
+            ))}
+            {auditTrail.commands.length === 0 && (
+              <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-2.5 py-2 text-xs text-[color:var(--muted)]">
+                No shell commands were captured in this receipt.
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="mt-5 grid grid-cols-3 gap-2">
@@ -150,6 +209,25 @@ export function ReceiptCard({
   );
 }
 
+function fallbackAuditTrail(receipt: TrustReceipt): NonNullable<TrustReceipt["body"]["auditTrail"]> {
+  const s = receipt.body;
+  const st = s.stats;
+  return {
+    promptExcerpt: null,
+    changedFiles: [],
+    evidenceSource: "none",
+    commands: [],
+    story: [
+      "This receipt was created before detailed audit trails were added.",
+      `${st.toolCalls} tool calls and ${st.edits} edits were recorded.`,
+      `${st.verified} verified, ${st.contradicted} failed, ${st.unsupported} unproven.`,
+      `Decision: ${fallbackDecision(s.trust, st).title}.`,
+    ],
+    privacyNote:
+      "Prompt and command text is redacted and length-capped. The full raw transcript is not embedded in the receipt.",
+  };
+}
+
 function fallbackDecision(
   trust: number,
   stats: TrustReceipt["body"]["stats"]
@@ -189,6 +267,15 @@ function fallbackActions(stats: TrustReceipt["body"]["stats"]): string[] {
     "Review the diff normally; AgentReceipt does not replace human code review.",
     "Keep the receipt with the PR so reviewers can inspect the evidence trail.",
   ];
+}
+
+function ContextLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-[color:var(--line)] bg-[color:var(--bg)] px-2.5 py-2">
+      <span className="font-semibold text-[color:var(--ink)]">{label}:</span>{" "}
+      <span>{value}</span>
+    </div>
+  );
 }
 
 function Stat({ label, value }: { label: string; value: number }) {

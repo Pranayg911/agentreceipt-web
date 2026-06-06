@@ -24,6 +24,30 @@ const SAMPLE: TrustReceipt = {
       "Fix the failing tests, rerun the test command after the final edit, then regenerate the receipt.",
       "Run the repo build after the final edit so reviewers can trust the artifact.",
     ],
+    auditTrail: {
+      promptExcerpt:
+        "Make AgentReceipt show whether the AI actually verified its code before I merge it.",
+      changedFiles: [
+        "src/cli.ts",
+        "src/receipt.ts",
+        "src/analyze.ts",
+        "README.md",
+      ],
+      evidenceSource: "git",
+      commands: [
+        { command: "npm test", status: "failed", exitCode: 1 },
+        { command: "npm run typecheck", status: "passed", exitCode: 0 },
+      ],
+      story: [
+        "User asked: \"Make AgentReceipt show whether the AI actually verified its code before I merge it.\"",
+        "Files changed: src/cli.ts, src/receipt.ts, src/analyze.ts, README.md.",
+        "Commands observed: 2 total (1 passed, 1 failed, 0 unknown).",
+        "Top issue: Tests failed during the session - npm test exited 1.",
+        "Decision: Do not merge yet.",
+      ],
+      privacyNote:
+        "Prompt and command text is redacted and length-capped. The full raw transcript is not embedded in the receipt.",
+    },
     claims: [
       {
         kind: "tests",

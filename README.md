@@ -17,6 +17,7 @@ AgentReceipt Web makes AI-code verification understandable and shareable:
 - Manual upload/paste fallback for Claude Code, Codex, and Cursor session artifacts.
 - Signed receipt viewer at `/r/[token]`.
 - Decision-oriented receipt UI: merge, verify first, stop, or no evidence.
+- Human-readable audit trail: request excerpt, files changed, commands run, top issue, and decision.
 - Exact next actions for reviewers and agent users.
 - Open Graph receipt images for Slack, Twitter/X, LinkedIn, and GitHub previews.
 
@@ -36,6 +37,7 @@ The useful output is not just a score. It is a signed review artifact with:
 - `decision`: what the reviewer should do now.
 - `summary`: why the decision was made.
 - `nextActions`: exact steps to improve or prove the work.
+- `auditTrail`: redacted context showing what the user asked, which files changed, and which commands ran.
 - `claims`: evidence rows with pass/fail/gap status.
 
 ## Privacy
